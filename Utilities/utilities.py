@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 import tensorflow as tf
+import re
 from PIL import Image as PI 
 from scipy import sparse
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -13,6 +14,7 @@ from sklearn.preprocessing import Imputer
 from sklearn.pipeline import FeatureUnion
 from datetime import datetime
 from functools import partial
+
 
 def generate_image_array(filename, height, width, scale_to_one = True):
     image = PI.open(filename)
@@ -329,4 +331,18 @@ def random_batch_array(X_train, y_train, batch_size):
     y_batch = y_train[rnd_indices]
     y_batch = y_batch[:,0]
     return X_batch, y_batch
+
+def get_ground_truth_string(filename, validation_array, class_list):
+    filename_num = int(re.findall('\d+', filename )[1]) - 1
+    item_num = int(validation_array[filename_num])
+    right_class = class_list[item_num - 1]
+    return right_class
+
+def find_new_imagenet_ground_truth_int(correct_class, image_net_dict_file):
+    for num, class_items in image_net_dict_file.items():    # for name, age in dictionary.iteritems():  (for Python 2.x)
+        class_list = class_items.split(',')
+        for items in class_list:
+            if items == correct_class:
+                return num
+    return 1
 

@@ -7,22 +7,21 @@ from PIL import ImageFilter
 from os.path import isfile
 import argparse
 
-def blur_and_print_image(image_full,image_name, output_path):
+def resize_and_print_image(image_full,image_name, output_path, height, width):
     file, ext = os.path.splitext(image_full)
     abrev_name, ext = os.path.splitext(image_name)
     image = PI.open(image_full)
-    blur_ammount = random.randint(20,60)
-    image_blurred = image.filter(ImageFilter.BoxBlur(blur_ammount))
-    image_blurred_final = image_blurred.filter(ImageFilter.DETAIL)
+    maxsize = (height,width)
+    image.thumbnail(maxsize,resample=PI.ANTIALIAS)
     print('File Made: ' + output_path + '/' + abrev_name + ".jpeg")
-    image_blurred_final.save(output_path + '/' + abrev_name + ".jpeg", "JPEG")
+    image.save(output_path + '/' + abrev_name + ".jpeg", "JPEG")
 
 
-def blur_images_in_directory(folder_path, output_path):
+def resize_images_in_directory(folder_path, output_path, height, width):
     files = os.listdir(folder_path)
     for i in files:
         file_full = folder_path + "/" + i
         file_abreviated = i
         if (isfile(file_full) and file_full.endswith(".JPEG")):
-            blur_and_print_image(file_full, file_abreviated, output_path)
+            resize_and_print_image(file_full, file_abreviated, output_path, height, width)
 

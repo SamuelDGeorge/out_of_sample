@@ -28,6 +28,8 @@ def parse_record(raw_record, is_training):
             tf.FixedLenFeature([], dtype=tf.int64, default_value=-1),
         'image/class/text':
             tf.FixedLenFeature([], dtype=tf.string, default_value=''),
+        'image/filename':
+            tf.FixedLenFeature([], dtype=tf.string, default_value='default.JPEG')
     }
  
     parsed = tf.parse_single_example(raw_record, keys_to_features)
@@ -44,8 +46,11 @@ def parse_record(raw_record, is_training):
     label = tf.cast(
         tf.reshape(parsed['image/class/label'], shape=[]),
         dtype=tf.int32)
+
+    filename = tf.reshape(parsed['image/filename'], shape=[])
+    
  
-    return image, label
+    return image, label, filename
 
 def get_batch(is_training, filenames, batch_size, num_epochs=1, num_parallel_calls=1):
     dataset = tf.data.TFRecordDataset(filenames)
@@ -78,6 +83,6 @@ def build_iterator(is_training, filenames, batch_size, num_epochs=1000, num_para
     iterator = dataset.make_one_shot_iterator()
     return iterator
 
-def get_values(sess, a,b):
-    a, b = sess.run([a,b])
-    return a,b - 1
+def get_values(sess, a,b,c):
+    a, b, c = sess.run([a,b,c])
+    return a,b - 1, c
