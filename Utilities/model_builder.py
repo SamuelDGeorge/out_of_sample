@@ -1,5 +1,6 @@
 
 import tensorflow as tf
+import numpy as np
 
 def get_image(image_file):
     if not tf.gfile.Exists(image_file):
@@ -34,17 +35,19 @@ def parse_record(raw_record, is_training):
  
     parsed = tf.parse_single_example(raw_record, keys_to_features)
  
-    image = tf.image.decode_image(
+    image = tf.image.decode_jpeg(
         tf.reshape(parsed['image/encoded'], shape=[]),
-        3)
- 
+        channels=3)
+
     # Note that tf.image.convert_image_dtype scales the image data to [0, 1).
     image = tf.image.convert_image_dtype(image, dtype=tf.float32)
- 
-    image = tf.image.resize_image_with_crop_or_pad(image,331,331)
-    
+    image = tf.image.resize_image_with_crop_or_pad(image,331,331) 
+
+    offset_num = np.array([-1])
+    offset_t = tf.constant(offset_num, dtype=tf.int64)
+    label = tf.add(parsed['image/class/label'],offset_t)
     label = tf.cast(
-        tf.reshape(parsed['image/class/label'], shape=[]),
+        tf.reshape(label, shape=[]),
         dtype=tf.int32)
 
     filename = tf.reshape(parsed['image/filename'], shape=[])
@@ -80,9 +83,22 @@ def build_iterator(is_training, filenames, batch_size, num_epochs=1000, num_para
     dataset = dataset.shuffle(buffer_size=10000)
     dataset = dataset.batch(batch_size)
     dataset = dataset.repeat(num_epochs)
-    iterator = dataset.make_one_shot_iterator()
+    iterator = dataset.make_initializable_iterator()
     return iterator
 
-def get_values(sess, a,b,c):
-    a, b, c = sess.run([a,b,c])
-    return a,b - 1, c
+def get_values_imagenet(sess, image,label,filename):
+    im, lab, file = sess.run([image,label,filename])
+    return im,lab - 1, file
+
+def get_values_bounded(sess, image,label,filename, offset):
+    im, lab, file = sess.run([image,label,filename])
+    lab = lab + offset
+    return im,lab,file
+
+def get_values_bounded_points(sess, image,p1,p2,p3,p4,filename, offset):
+    im,y1,y2,y3,y4,file = sess.run([image,p1,p2,p3,p4,filename])
+    y1 = y1 + offset
+    y2 = y2 + offset
+    y3 = y3 + offset
+    y4 = y4 + offset
+    return im,y1,y2,y3,y4,file

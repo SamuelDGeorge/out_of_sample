@@ -23,7 +23,7 @@ from __future__ import print_function
 import copy
 import tensorflow as tf
 
-import nasnet_utils
+import imagenet_helper_files.nets.nasnet_utils as nasnet_utils
 
 arg_scope = tf.contrib.framework.arg_scope
 slim = tf.contrib.slim
