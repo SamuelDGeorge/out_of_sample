@@ -86,6 +86,19 @@ def build_iterator(is_training, filenames, batch_size, num_epochs=1000, num_para
     iterator = dataset.make_initializable_iterator()
     return iterator
 
+def build_dataset(is_training, filenames, batch_size, num_epochs=1000, num_parallel_calls=12):
+    dataset = tf.data.TFRecordDataset(filenames)
+
+    if is_training:
+        dataset = dataset.shuffle(buffer_size=1500)
+
+    dataset = dataset.map(lambda value: parse_record(value, is_training),
+                            num_parallel_calls=num_parallel_calls)
+    dataset = dataset.shuffle(buffer_size=10000)
+    dataset = dataset.batch(batch_size)
+    dataset = dataset.repeat(num_epochs)
+    return dataset
+
 def get_values_imagenet(sess, image,label,filename):
     im, lab, file = sess.run([image,label,filename])
     return im,lab - 1, file
