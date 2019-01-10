@@ -10,7 +10,9 @@ def get_likelihood_avg(class_labels, number_of_classes, likelihood_list, likelih
         current_mean = tf.gather(likelihood_averages, i)
         batch_count = tf.gather(number_of_batchs, i)
         new_mean = ((current_mean * batch_count) + (sample_number * mean))/(batch_count + sample_number) 
-        mean_array.append(new_mean)
+        
+        to_add = tf.cond(tf.equal(sample_number,0), lambda: current_mean, lambda: new_mean)  
+        mean_array.append(to_add)
     mean_array = tf.stack(mean_array)
         
     return mean_array
@@ -27,7 +29,8 @@ def get_likelihood_stdev(class_labels, number_of_classes, likelihood_list, likel
         current_stdev = tf.gather(likelihood_std, i)
         batch_count = tf.gather(number_of_batchs, i)
         new_std = ((current_stdev * batch_count) + (sample_number * stdev))/(batch_count + sample_number) 
-        stdev_array.append(new_std)
+        to_add = tf.cond(tf.equal(sample_number,0), lambda: current_stdev, lambda: new_std)  
+        stdev_array.append(to_add)
     stdev_array = tf.stack(stdev_array)
         
     return stdev_array

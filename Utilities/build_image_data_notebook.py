@@ -183,7 +183,7 @@ def _process_image(filename, coder):
 
   # Convert any PNG to JPEG's for consistency.
   if _is_png(filename):
-    print('Converting PNG to JPEG for %s' % filename)
+    #print('Converting PNG to JPEG for %s' % filename)
     image_data = coder.png_to_jpeg(image_data)
 
   # Decode the RGB JPEG.
